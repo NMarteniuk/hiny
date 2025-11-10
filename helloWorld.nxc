@@ -1,0 +1,33 @@
+void DriveForward(int power, int ms) {
+  OnFwd(OUT_BC, power);
+  Wait(ms);
+  Off(OUT_BC);
+}
+
+void DriveBackward(int power, int ms) {
+  OnRev(OUT_BC, power);
+  Wait(ms);
+  Off(OUT_BC);
+}
+
+void TurnLeft(int power, int ms) {
+  OnFwd(OUT_B, power);
+  // OnRev(OUT_C, power);
+  Wait(ms);
+  Off(OUT_BC);
+}
+
+void TurnRight(int power, int ms) {
+  OnFwd(OUT_C, power);
+ // OnRev(OUT_B, power);
+  Wait(ms);
+  Off(OUT_BC);
+}
+
+task main() {
+  DriveForward(60, 1500);
+  TurnRight(60, 400);
+  DriveForward(60, 1500);
+  DriveBackward(50, 1000);
+  Off(OUT_BC);
+}

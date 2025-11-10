@@ -1,0 +1,31 @@
+#define SENSOR_PORT IN_3
+#define LEFT_MOTOR  OUT_B
+#define RIGHT_MOTOR OUT_C
+
+task main() {
+  int power = 60;    
+  int schwelle;
+  int lightValue;
+
+  SetSensorLight(SENSOR_PORT);
+  Wait(500);
+
+  schwelle = 50;
+
+  TextOut(0, LCD_LINE1, "LineTest");
+
+  while (true) {
+    lightVa lue = Sensor(SENSOR_PORT);
+
+    if (lightValue < schwelle) {
+      OnFwd(LEFT_MOTOR, power / 2);  
+      OnFwd(RIGHT_MOTOR, power);
+    }
+    else {
+      OnFwd(LEFT_MOTOR, power);
+      OnFwd(RIGHT_MOTOR, power / 2);
+    }
+
+    Wait(10);
+  }
+}
