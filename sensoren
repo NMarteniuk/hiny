@@ -1,0 +1,73 @@
+#define SENSOR_PORT1 IN_1
+#define SENSOR_PORT2 IN_2
+#define SENSOR_PORT3 IN_3
+#define LEFT_MOTOR   OUT_B
+#define RIGHT_MOTOR OUT_C
+#define int DIFFERENZ1_2
+#define int DIFFERENZ2_3
+
+
+void turnright(int power)
+{
+	OnFwd(LEFT_MOTOR, power / 2);  
+    OnFwd(RIGHT_MOTOR, power);
+}
+
+void turnleft(int power)
+{
+	OnFwd(RIGHT_MOTOR_MOTOR, power / 2);  
+    OnFwd(LEFT_MOTOR, power);
+}
+
+int checkdif1_2()
+{
+	differenz1_2 = Sensor(SENSOR_PORT1) - Sensor(SENSOR_PORT2);
+	return differenz1_2;
+}
+
+int checkdif2_3()
+{
+	differenz2_3 = Sensor(SENSOR_PORT3) - Sensor(SENSOR_PORT2);
+	return differenz2_3;
+}
+
+task main() {
+  int schnell = 60;    
+
+  SetSensorLight(SENSOR_PORT1, SENSOR_PORT2, SENSOR_PORT3);
+  Wait(500);
+
+
+  while(true)
+{
+
+  while(checkdif1_2() >= 30 && checkdif2_3() >= 30)
+  {
+	OnFwd(OUT_AB, schnell);
+	Wait(100);
+  }
+  while((checkdif1_2() - checkdif2_3()) >= -10) // dif2_3 ist 10 größer als dif1_2 
+  {
+	if (Sensor(SENSOR_PORT1) > Sensor(SENSOR_PORT3)) // 1 ist heller als drei
+	{
+		turnright(schnell);
+	}
+	if (Sensor(SENSOR_PORT1) < Sensor(SENSOR_PORT3)) // 1 ist dunkler als drei
+	{
+		turnleft(schnell);
+	}
+  }
+    while((checkdif1_2() - checkdif2_3()) >= 10) // dif1_2 ist 10 größer als dif2_3 
+  {
+	if (Sensor(SENSOR_PORT1) > Sensor(SENSOR_PORT3)) // 1 ist heller als drei
+	{
+		turnleft(schnell);
+	}
+	if (Sensor(SENSOR_PORT1) < Sensor(SENSOR_PORT3)) // 1 ist dunkler als drei
+	{
+		turnright(schnell);
+	}
+  }
+} 
+
+}
