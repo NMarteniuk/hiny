@@ -14,12 +14,15 @@ void turnLeft(int power) {
   OnFwd(LEFT_MOTOR,  power / 2);
 }
 
+
+
 int dif1_2() { 
 return Sensor(SENSOR_PORT1) - Sensor(SENSOR_PORT2); 
 }
 int dif2_3() { 
 return Sensor(SENSOR_PORT3) - Sensor(SENSOR_PORT2); 
 }
+
 
 task main() {
   int schnell = 60; 
@@ -47,7 +50,6 @@ task main() {
       }
       Wait(20);
     } 
-
     while ( (dif1_2() - dif2_3()) >= 10 ) {
       int v1 = Sensor(SENSOR_PORT1);
       int v3 = Sensor(SENSOR_PORT3);
