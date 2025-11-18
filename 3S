@@ -1,0 +1,68 @@
+#define SENSOR_PORT1 IN_1 
+#define SENSOR_PORT2 IN_2 
+#define SENSOR_PORT3 IN_3  
+#define LEFT_MOTOR   OUT_B
+#define RIGHT_MOTOR  OUT_C
+
+void turnRight(int power) {
+  OnFwd(LEFT_MOTOR,  power);
+  OnFwd(RIGHT_MOTOR, power / 2);
+}
+
+void turnLeft(int power) {
+  OnFwd(RIGHT_MOTOR, power);
+  OnFwd(LEFT_MOTOR,  power / 2);
+}
+
+int dif1_2() { 
+return Sensor(SENSOR_PORT1) - Sensor(SENSOR_PORT2); 
+}
+int dif2_3() { 
+return Sensor(SENSOR_PORT3) - Sensor(SENSOR_PORT2); 
+}
+
+task main() {
+  int schnell = 60; 
+  SetSensorLight(SENSOR_PORT1);
+  SetSensorLight(SENSOR_PORT2);
+  SetSensorLight(SENSOR_PORT3);
+  Wait(500);
+
+  while(true) {
+    while (dif1_2() >= 30 && dif2_3() >= 30) {
+      OnFwd(LEFT_MOTOR  | RIGHT_MOTOR, schnell);
+      Wait(50);
+    }
+
+    while ( (dif2_3() - dif1_2()) >= 10 ) {
+      int v1 = Sensor(SENSOR_PORT1);
+      int v3 = Sensor(SENSOR_PORT3);
+
+      if (v1 > v3) {       
+        turnRight(schnell);
+      } else if (v1 < v3) {
+        turnLeft(schnell);
+      } else {
+        OnFwd(LEFT_MOTOR | RIGHT_MOTOR, schnell);
+      }
+      Wait(20);
+    } 
+
+    while ( (dif1_2() - dif2_3()) >= 10 ) {
+      int v1 = Sensor(SENSOR_PORT1);
+      int v3 = Sensor(SENSOR_PORT3);
+
+      if (v1 > v3) {
+        turnRight(schnell);
+      } else if (v1 < v3) {
+        turnLeft(schnell);
+      } else {
+        OnFwd(LEFT_MOTOR | RIGHT_MOTOR, schnell);
+      }
+      Wait(20);
+    }
+
+    OnFwd(LEFT_MOTOR | RIGHT_MOTOR, schnell);
+    Wait(20);
+  }
+}
