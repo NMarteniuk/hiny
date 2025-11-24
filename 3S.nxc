@@ -5,16 +5,14 @@
 #define RIGHT_MOTOR  OUT_C
 
 void turnRight(int power) {
-  OnFwd(LEFT_MOTOR,  power);
-  OnFwd(RIGHT_MOTOR, power / 2);
+  OnRev(LEFT_MOTOR,  power);
+  OnRev(RIGHT_MOTOR, power / 8);
 }
 
-void turnLeft(int power) {
-  OnFwd(RIGHT_MOTOR, power);
-  OnFwd(LEFT_MOTOR,  power / 2);
+void turnLeft(int power){
+  OnRev(RIGHT_MOTOR, power * 1.25);
+  OnRev(LEFT_MOTOR, power / 8);
 }
-
-
 
 int dif1_2() { 
 return Sensor(SENSOR_PORT1) - Sensor(SENSOR_PORT2); 
@@ -25,46 +23,61 @@ return Sensor(SENSOR_PORT3) - Sensor(SENSOR_PORT2);
 
 
 task main() {
-  int schnell = 60; 
+  int schnell = 80; 
   SetSensorLight(SENSOR_PORT1);
   SetSensorLight(SENSOR_PORT2);
   SetSensorLight(SENSOR_PORT3);
   Wait(500);
 
   while(true) {
-    while (dif1_2() >= 30 && dif2_3() >= 30) {
-      OnFwd(LEFT_MOTOR  | RIGHT_MOTOR, schnell);
-      Wait(50);
+    while (dif1_2() >= 40 && dif2_3() >= 40) {
+      OnRev(OUT_BC, schnell);
+      Wait(40);
     }
 
-    while ( (dif2_3() - dif1_2()) >= 10 ) {
+    while ( (dif2_3() - dif1_2()) >= 8.5 ) {
       int v1 = Sensor(SENSOR_PORT1);
       int v3 = Sensor(SENSOR_PORT3);
 
-      if (v1 > v3) {       
-        turnRight(schnell);
-      } else if (v1 < v3) {
+      if (v1 < v3) {
         turnLeft(schnell);
-      } else {
-        OnFwd(LEFT_MOTOR | RIGHT_MOTOR, schnell);
+        Wait(20);
+      } 
+      else if (v1 > v3) {
+         //   if (v1 - v3 >= 80 || v1 - v3 <= 80){
+         //  turnLeft(schnell);
+        // } 
+        turnRight(schnell);
+        Wait(20);
+      } 
+      else {
+        OnRev(OUT_BC, schnell);
+        Wait(20);
       }
-      Wait(20);
     } 
-    while ( (dif1_2() - dif2_3()) >= 10 ) {
+    while ( (dif1_2() - dif2_3()) >= 8.5 ) {
       int v1 = Sensor(SENSOR_PORT1);
       int v3 = Sensor(SENSOR_PORT3);
-
-      if (v1 > v3) {
-        turnRight(schnell);
-      } else if (v1 < v3) {
+      
+      if (v1 < v3) {
         turnLeft(schnell);
-      } else {
-        OnFwd(LEFT_MOTOR | RIGHT_MOTOR, schnell);
+        Wait(20);
+      } 
+      else if (v1 > v3) {
+         //   if (v1 - v3 >= 80 || v1 - v3 <= 80){
+         //  turnLeft(schnell);
+        // } 
+        turnRight(schnell);
+        Wait(20);
+      } 
+      else {
+        OnRev(OUT_BC, schnell);
+        Wait(20);
       }
-      Wait(20);
+      Wait(40);
     }
 
-    OnFwd(LEFT_MOTOR | RIGHT_MOTOR, schnell);
-    Wait(20);
+    OnRev(OUT_BC, schnell);
+    Wait(40);
   }
 }
