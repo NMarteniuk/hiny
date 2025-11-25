@@ -14,6 +14,20 @@ void turnLeft(int power){
   OnRev(LEFT_MOTOR, power / 8);
 }
 
+void us(int distance){
+  if (distance < 10){
+    turnLeft(80);
+    turnLeft(80);
+  }
+}
+
+void turnAround()
+{
+	Off(OUT_BC);
+	OnRev(OUT_C, 100);
+	Wait(800);
+}
+
 int dif1_2() { 
 return Sensor(SENSOR_PORT1) - Sensor(SENSOR_PORT2); 
 }
@@ -27,15 +41,17 @@ task main() {
   SetSensorLight(SENSOR_PORT1);
   SetSensorLight(SENSOR_PORT2);
   SetSensorLight(SENSOR_PORT3);
+  SetSensorLowspeed(IN_4);
   Wait(500);
 
   while(true) {
-    while (dif1_2() >= 40 && dif2_3() >= 40) {
+    while(SensorUS(IN_4) >= 15){
+      while (dif1_2() >= 40 && dif2_3() >= 40) {
       OnRev(OUT_BC, schnell);
       Wait(40);
-    }
+      }
 
-    while ( (dif2_3() - dif1_2()) >= 8.5 ) {
+      while ( (dif2_3() - dif1_2()) >= 8.5 ) {
       int v1 = Sensor(SENSOR_PORT1);
       int v3 = Sensor(SENSOR_PORT3);
 
@@ -54,8 +70,8 @@ task main() {
         OnRev(OUT_BC, schnell);
         Wait(20);
       }
-    } 
-    while ( (dif1_2() - dif2_3()) >= 8.5 ) {
+      } 
+      while ( (dif1_2() - dif2_3()) >= 8.5 ) {
       int v1 = Sensor(SENSOR_PORT1);
       int v3 = Sensor(SENSOR_PORT3);
       
@@ -79,5 +95,8 @@ task main() {
 
     OnRev(OUT_BC, schnell);
     Wait(40);
+    }
+    turnAround();
   }
 }
+
