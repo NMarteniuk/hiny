@@ -1,0 +1,126 @@
+#define SENSOR_PORT1 IN_1 
+#define SENSOR_PORT2 IN_2 
+#define SENSOR_PORT3 IN_3  
+#define LEFT_MOTOR   OUT_B
+#define RIGHT_MOTOR  OUT_C
+
+\\barcode erkennung
+\\ende erkennen 
+\\vor der schranke halten -> wenden umscheiben? 
+\\ block schieben 
+
+void turnRight(int power) {
+  OnRev(LEFT_MOTOR,  power);
+  OnRev(RIGHT_MOTOR, power / 8);
+}
+
+void turnLeft(int power){
+  OnRev(RIGHT_MOTOR, power * 1.25);
+  OnRev(LEFT_MOTOR, power / 8);
+}
+
+void us(int distance){
+  if (distance < 10){
+    turnLeft(80);
+    turnLeft(80);
+  }
+}
+
+void turnAround()
+{
+	Off(OUT_BC);
+	OnRev(OUT_C, 100);
+	Wait(800);
+}
+
+int dif1_2() { 
+return Sensor(SENSOR_PORT1) - Sensor(SENSOR_PORT2); 
+}
+int dif2_3() { 
+return Sensor(SENSOR_PORT3) - Sensor(SENSOR_PORT2); 
+}
+
+
+task main() {
+  int schnell = 80; 
+  i = 0;
+  SetSensorLight(SENSOR_PORT1);
+  SetSensorLight(SENSOR_PORT2);
+  SetSensorLight(SENSOR_PORT3);
+  SetSensorLowspeed(IN_4);
+  Wait(500);
+
+  while(true) {
+    while(SensorUS(IN_4) >= 15){
+      while (dif1_2() >= 40 && dif2_3() >= 40) {
+      OnRev(OUT_BC, schnell);
+      Wait(40);
+      }
+
+      while ( (dif2_3() - dif1_2()) >= 8.5 ) {
+      int v1 = Sensor(SENSOR_PORT1);
+      int v3 = Sensor(SENSOR_PORT3);
+
+      if (v1 < v3) {
+        turnLeft(schnell);
+        Wait(20);
+      } 
+      else if (v1 > v3) {
+        turnRight(schnell);
+        Wait(20);
+      } 
+      else {
+        OnRev(OUT_BC, schnell);
+        Wait(20);
+      }
+      } 
+      while ( (dif1_2() - dif2_3()) >= 8.5 ) {
+      int v1 = Sensor(SENSOR_PORT1);
+      int v3 = Sensor(SENSOR_PORT3);
+      
+      if (v1 < v3) {
+        turnLeft(schnell);
+        Wait(20);
+      } 
+      else if (v1 > v3) {
+        turnRight(schnell);
+        Wait(20);
+      } 
+      else {
+        OnRev(OUT_BC, schnell);
+        Wait(20);
+      }
+      Wait(40);
+    }
+
+
+
+    OnRev(OUT_BC, schnell);
+    Wait(40);
+    }
+    \\wenden, warten, oder schieben?
+    if(i >0 ){ 
+      if (i == 1){\\ballannahme + schranke
+      Off(OUT_BC);
+      Wait(1000);
+      i = 2;
+      }
+      else{
+        if(i == 2){ \\schieben
+          while(SensorUS(IN_4<= 15))
+          {OnRev(OUT_BC);}
+          turnAround();
+          \\brauchen wir hier noch was was ihn rechts abbiegen lässt?
+        i = 3;
+        }
+        else{ \\ ende, hier kommt die ballabgabe hin
+        }
+      }
+      }
+    else
+    {turnAround();
+    i = 1;
+    }
+  }
+}
+
