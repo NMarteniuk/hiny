@@ -1,0 +1,144 @@
+#define SENSOR_PORT1 IN_1 
+#define SENSOR_PORT2 IN_2 
+#define SENSOR_PORT3 IN_3  
+#define LEFT_MOTOR   OUT_B
+#define RIGHT_MOTOR  OUT_C
+#define BOTH_MOTORS  OUT_BC
+#define BALL_MOTOR   OUT_A
+
+int Speed = 70; // 60 standart
+
+void setLightSensors() {
+  SetSensorLight(SENSOR_PORT1);
+  SetSensorLight(SENSOR_PORT2);
+  SetSensorLight(SENSOR_PORT3);
+}
+
+void setUsSensor(){
+  SetSensorLowspeed(IN_4);
+}
+
+void turnRight(int power) {
+  OnRev(LEFT_MOTOR,  100);
+  OnRev(RIGHT_MOTOR, 0);
+}
+
+void turnLeft(int power){
+  OnRev(RIGHT_MOTOR, 100);   
+  OnRev(LEFT_MOTOR,  0);
+}
+
+void turnAround() {
+  Off(BOTH_MOTORS);
+  Wait(30);
+  OnFwd(BOTH_MOTORS, 100);
+  Wait(20);
+  OnRev(OUT_B, 100);
+  Wait(600);
+
+}
+
+int dif1_2() { 
+  return Sensor(SENSOR_PORT1) - Sensor(SENSOR_PORT2); 
+}
+int dif2_3() { 
+  return Sensor(SENSOR_PORT3) - Sensor(SENSOR_PORT2); 
+}
+
+void ridingOnTheLine(){
+  OnRev(BOTH_MOTORS, Speed); // hier wäre besser 80-90 +-
+}
+
+void firstOpportunityToTurn() {
+  if ((dif2_3() - dif1_2()) >= 8.5) {    
+    int v1 = Sensor(SENSOR_PORT1);
+    int v3 = Sensor(SENSOR_PORT3);
+
+    if (v1 < v3) {
+      turnLeft(Speed);
+    } 
+    else if (v1 > v3) {
+      turnRight(Speed);
+
+    } 
+    else {
+      OnRev(BOTH_MOTORS, Speed);
+    }
+  }
+}
+
+void secondOpportunityToTurn() {
+  if ((dif1_2() - dif2_3()) >= 8.5) {
+    int v1 = Sensor(SENSOR_PORT1);
+    int v3 = Sensor(SENSOR_PORT3);
+      
+    if (v1 < v3) {
+      turnLeft(Speed);
+    } 
+    else if (v1 > v3) { 
+      turnRight(Speed);
+    } 
+    else {
+      OnRev(BOTH_MOTORS, Speed);
+    }
+  }
+}
+
+void ball() {
+  Off(BOTH_MOTORS);
+  Wait(1000);
+  OnFwd(OUT_A, 40);
+  Wait(1000);
+  OnRev(OUT_A, 50);
+}
+
+task main() {
+  setLightSensors();
+  setUsSensor();
+  Wait(500);
+
+  while(true) {
+
+    int dist = SensorUS(IN_4);
+
+    if (dist > 20) {
+      ridingOnTheLine();
+      firstOpportunityToTurn();
+      secondOpportunityToTurn();
+    } else {
+      turnAround();
+    }
+
+    int v1 = Sensor(SENSOR_PORT1);
+    int v2 = Sensor(SENSOR_PORT2);
+    int v3 = Sensor(SENSOR_PORT3);
+    /*
+    if((v1 < 40) && (v2 < 40) && (v3 < 40)) {
+        int sec = 5; // ?????
+        bool ball_verwen = false;
+        for (int i = 0; i <= sec; i ++ ){
+            int v1 = Sensor(SENSOR_PORT1);
+            int v2 = Sensor(SENSOR_PORT2);
+            int v3 = Sensor(SENSOR_PORT3);
+            if ((v1 < 45) && (v2 < 45) && (v3 < 45)){
+                ball_verwen = true;
+            }
+        }
+        if (ball_verwen){
+            ball();
+            Wait(200);
+            break;
+        }
+        continue;
+    }
+    */
+    // entweder sehr schnell umdrehen oder Timer verwenden
+    if ((v1 == v3) && (v1 < 45) && (v2 < 45) && (v3 < 45)){
+        ball();
+        Wait(200);
+        break;
+    }
+
+    Wait(10);
+  }
+}
