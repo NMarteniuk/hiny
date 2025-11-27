@@ -1,0 +1,163 @@
+#define SENSOR_PORT1 IN_1 
+#define SENSOR_PORT2 IN_2 
+#define SENSOR_PORT3 IN_3  
+#define LEFT_MOTOR   OUT_B
+#define RIGHT_MOTOR  OUT_C
+#define BOTH_MOTORS OUT_BC
+#define BALL_MOTOR  OUT_A
+
+int Speed = 60;
+
+
+void setLightSensors() {
+  SetSensorLight(SENSOR_PORT1);
+  SetSensorLight(SENSOR_PORT2);
+  SetSensorLight(SENSOR_PORT3);
+}
+
+void setUsSensor(){
+  SetSensorLowspeed(IN_4);
+}
+
+void turnRight(int power) {
+  OnRev(LEFT_MOTOR,  power);
+  OnRev(RIGHT_MOTOR, power / 8);
+}
+
+void turnLeft(int power){
+  OnRev(RIGHT_MOTOR, power * 1.25);
+  OnRev(LEFT_MOTOR, power / 8);
+}
+
+void turnAround()
+{
+	Off(BOTH_MOTORS);
+  Wait(3000);
+  OnFwd(BOTH_MOTORS, 100);
+  Wait(200);
+	OnFwd(OUT_C, 100);
+	Wait(800);
+}
+
+int dif1_2() { 
+return Sensor(SENSOR_PORT1) - Sensor(SENSOR_PORT2); 
+}
+int dif2_3() { 
+return Sensor(SENSOR_PORT3) - Sensor(SENSOR_PORT2); 
+}
+
+
+void ridingOnTheLine(){
+  if (dif1_2() >= 40 && dif2_3() >= 40) {
+    OnRev(BOTH_MOTORS, Speed);
+    Wait(40);
+  }
+}
+
+void firstOpportunityToTurn()
+{
+  if ((dif2_3() - dif1_2()) >= 8.5) 
+  {
+      int v1 = Sensor(SENSOR_PORT1);
+      int v3 = Sensor(SENSOR_PORT3);
+
+      if (v1 < v3) {
+        turnLeft(Speed);
+        Wait(20);
+      } 
+      else if (v1 > v3) {
+        turnRight(Speed);
+        Wait(20);
+      } 
+      else {
+        OnRev(BOTH_MOTORS, Speed);
+        Wait(20);
+      }
+  }
+}
+
+
+void secondOpportunityToTurn()
+{
+  if ( (dif1_2() - dif2_3()) >= 8.5 ) {
+    int v1 = Sensor(SENSOR_PORT1);
+    int v3 = Sensor(SENSOR_PORT3);
+      
+    if (v1 < v3) {
+      turnLeft(Speed);
+      Wait(20);  
+    } 
+    else if (v1 > v3) { 
+      turnRight(Speed);
+      Wait(20);
+    } 
+    else {
+      OnRev(BOTH_MOTORS, Speed);
+      Wait(20);
+    }
+    Wait(40);
+  }
+}
+
+
+void holzklotz(){
+  turnRight(Speed);
+  while(SensorUS(IN_4) < 200)
+  {
+    ridingOnTheLine();
+  }
+  if (SensorUS(IN_4 > 100)) {
+    turnAround();
+    ridingOnTheLine();
+    firstOpportunityToTurn();
+  }
+}
+
+void ball()
+{
+  Off(BOTH_MOTORS);
+  Wait(1000);
+  OnFwd(OUT_A, 40);
+  Wait(1000);
+  OnRev(OUT_A, 50);
+}
+
+
+
+
+
+
+
+
+task main() {
+  setLightSensors();
+  setUsSensor();
+  int lightCount = 0;
+  int time = 0;
+  Wait(500);
+
+
+  while(true) {
+
+    if (SensorUS(IN_4) >= 20)
+    {
+      ridingOnTheLine();
+      firstOpportunityToTurn();
+      secondOpportunityToTurn();
+    }
+    else
+    {
+      turnAround();
+    }
+    int v1 = Sensor(SENSOR_PORT1);
+    int v2 = Sensor(SENSOR_PORT2);
+    int v3 = Sensor(SENSOR_PORT3);
+    if(v1 == v2 && v2 == v3){
+      ball();
+      Wait(200);
+      break;
+    }
+  }
+}
+
+
