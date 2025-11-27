@@ -152,7 +152,7 @@ task main() {
     int v1 = Sensor(SENSOR_PORT1);
     int v2 = Sensor(SENSOR_PORT2);
     int v3 = Sensor(SENSOR_PORT3);
-    if(v1 == v2 && v2 == v3){
+    if((v1 == v2 && v2 == v3) && v1 < 40){
       ball();
       Wait(200);
       break;
