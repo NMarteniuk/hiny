@@ -96,12 +96,13 @@ task main() {
   setLightSensors();
   setUsSensor();
   Wait(500);
+ int ballAbgabe = 0;
 
   while(true) {
 
     int dist = SensorUS(IN_4);
 
-    if (dist > 20) {
+    if (dist >=28 ){
       ridingOnTheLine();
       firstOpportunityToTurn();
       secondOpportunityToTurn();
@@ -133,12 +134,23 @@ task main() {
     }
     */
     // entweder sehr schnell umdrehen oder Timer verwenden
-    if ((v1 == v3) && (v1 < 45) && (v2 < 45) && (v3 < 45)){
+    if((v1==v3) && (v1 < 45) && (v2 < 45) && (v3 < 45)){
+      ballAbgabe += 1;
+      Wait(40);
+    }
+    if (ballAbgabe >= 1 && SensorUS(IN_4) <= 29){
+        ball();
+        Wait(20);
+        break;
+    }
+    ballAbgabe = 0;
+    /*
+    if ((v1 == v3) && (v1 < 45) && (v2 < 45) && (v3 < 45) && SensorUS(IN_4) <=29){
         ball();
         Wait(200);
         break;
     }
-
+  */
     Wait(10);
   }
 }
