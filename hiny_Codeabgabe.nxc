@@ -94,6 +94,7 @@ task main() {
   setUsSensor();
   Wait(500);
   int ballAbgabe = 0;
+  bool wen = false; 
   float d = (Sensor(SENSOR_PORT1) + Sensor(SENSOR_PORT3)) / 2.2;
 
   while(true) {
@@ -105,7 +106,16 @@ task main() {
       firstOpportunityToTurn();
       secondOpportunityToTurn();
     } else {
-      turnAround();
+        if(wen == false){
+        turnAround();
+        wen = true;}
+        else{
+          OnRev(BOTH_MOTORS, 60);
+          Wait(500);
+          Off(BOTH_MOTORS);
+          Wait(3000);
+
+        }
     }
 
     int v1 = Sensor(SENSOR_PORT1);
